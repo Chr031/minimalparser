@@ -1,14 +1,187 @@
 package com.gen.com.gen.language.basic
 
-class TokenApplier {
+import kotlin.math.pow
+
+class SyntaxErrorException(message: String) : Exception(message)
+
+
+class TokenApplier() {
   
   
-  fun unaryNegativeToken(t: Token):Token {
+  fun unaryNegativeToken(operator: Token, arg: Token): Token =
+    if (arg.isNumber())
+      Token(Word.NUMBER, "- (${arg.image()})", false, operator.start, arg.end) { arg.asNumber(it).negate() }
+    else
+      throw SyntaxErrorException("${arg.image()} at ${arg.start} is not a number")
   
-    if (t.isNumber()) return Token(Word.NUMBER, )
-  }
   
-  fun Token.isNumber() =
-    this.word == Word.NUMBER
+  fun subtractTokens(operator: Token, first: Token, second: Token): Token =
+    if (first.isNumber() && second.isNumber()) {
+      Token(Word.NUMBER, "${first.image()} - ${second.image()}", false, operator.start, second.end) { first.asNumber(it).minus(second.asNumber(it)) }
+    } else
+      if (!first.isNumber())
+        throw SyntaxErrorException("${first.image()} at ${first.start} is not a number")
+      else if (!second.isNumber())
+        throw SyntaxErrorException("${second.image()} at ${second.start} is not a number")
+      else
+        throw SyntaxErrorException("${first.image()} at ${first.start} or ${second.image()} at ${second.start} are not numbers")
+  
+  
+  fun unaryPositiveToken(operator: Token, arg: Token): Token =
+    if (arg.isNumber())
+      Token(Word.NUMBER, "+(${arg.image()})", false, operator.start, arg.end) { arg.asNumber(it) }
+    else
+      throw SyntaxErrorException("${arg.image()} at ${arg.start} is not a number")
+  
+  
+  fun addTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} + ${second.image()}", false, first.start, second.end) { first.asNumber(it).add(second.asNumber(it)) }
+      first.isString() || second.isString() ->
+        Token(Word.STRING, "${first.image()}${second.image()}", false, first.start, second.end) { "${first.evaluate(it)}${second.evaluate(it)}" }
+      
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be added to ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun multiplyTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} * ${second.image()}", false, first.start, second.end) { first.asNumber(it).multiply(second.asNumber(it)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be multiplied by ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun divideTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} / ${second.image()}", false, first.start, second.end) { first.asNumber(it).divide(second.asNumber(it)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be divided by ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun powerTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} ^ ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c).toDouble().pow(second.asNumber(c).toDouble()) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be elevated to power of ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun moduloTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} ^ ${second.image()}", false, first.start, second.end) { c -> first.asNumber(c).remainder(second.asNumber(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be moduled by ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun assignExpressionTokens(operator: Token, first: Token, second: Token): Token =
+    when {
+      first.isVariable() -> Token(Word.VARIABLE, first.varImage(), false, first.start, second.end)
+      { c ->
+        val eval = second.evaluate(c)
+        c.varMap[first.varImage()] = Token(Word.VARIABLE, first.varImage(), false, first.start, second.end) { eval }
+        eval
+      }
+      else ->
+        throw SyntaxErrorException("${first.word} is not a variable and cannot be assigned to ${second.word} at ${first.start}")
+      
+    }
+  
+  fun andTokens(first: Token, second: Token): Token =
+    when {
+      first.isBoolean() && second.isBoolean() ->
+        Token(Word.BOOLEAN, "${first.image()} && ${second.image()}", false, first.start, second.end)
+        { c -> first.asBoolean(c) && (second.asBoolean(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} & ${second.word} at ${first.start} is not possible")
+    }
+  
+  fun orTokens(first: Token, second: Token): Token =
+    when {
+      first.isBoolean() && second.isBoolean() ->
+        Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end)
+        { c -> first.asBoolean(c) || (second.asBoolean(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} & ${second.word} at ${first.start} is not possible")
+    }
+  
+  
+  fun equalTokens(first: Token, second: Token): Token =
+    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end) { c ->
+      first.evaluate(c) == second.evaluate(c)
+    }
+  
+  fun notEqualTokens(first: Token, second: Token): Token =
+    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end) { c ->
+      first.evaluate(c) != second.evaluate(c)
+    }
+  
+  fun lessTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} < ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) < (second.asNumber(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
+      
+    }
+  
+  fun lessOrEqualTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} <= ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) <= (second.asNumber(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun greaterTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} > ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) > (second.asNumber(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
+      
+    }
+  
+  
+  fun greaterOrEqualTokens(first: Token, second: Token): Token =
+    when {
+      first.isNumber() && second.isNumber() ->
+        Token(Word.NUMBER, "${first.image()} >= ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) >= (second.asNumber(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
+      
+    }
+  
+  fun notToken(operator: Token, arg: Token): Token =
+    when {
+      arg.isBoolean() -> Token(Word.BOOLEAN,"!${arg.image()}", false, operator.start, arg.end ) {
+        c -> !arg.asBoolean(c)
+      }
+      else ->
+        throw SyntaxErrorException("${arg.word} cannot be negated")
+      
+    }
+    
+  
   
 }
