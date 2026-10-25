@@ -1,4 +1,4 @@
-package com.gen.com.gen.language.basic
+package com.gen.language.basic
 
 import java.math.BigDecimal
 import kotlin.math.max
@@ -22,7 +22,3 @@ open class Token(val word: Word, private val image: String, val unary: Boolean, 
   
 }
 
-@FunctionalInterface
-interface Evaluator {
-  fun evaluate(c: Context): Any
-}

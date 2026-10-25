@@ -1,4 +1,4 @@
-package com.gen.com.gen.language.basic
+package com.gen.language.basic
 
 
 enum class Word(val lexable: Boolean, val regexImage: String, val operator: Boolean = false, val priority: Int = 0, val final: Boolean = false) {

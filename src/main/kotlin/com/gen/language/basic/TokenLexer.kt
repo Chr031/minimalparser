@@ -1,4 +1,4 @@
-package com.gen.com.gen.language.basic
+package com.gen.language.basic
 
 import java.math.BigDecimal
 import java.util.regex.Pattern

@@ -1,8 +1,7 @@
-package com.gen.com.gen.language.basic
+package com.gen.language.basic
 
+import java.math.RoundingMode
 import kotlin.math.pow
-
-class SyntaxErrorException(message: String) : Exception(message)
 
 
 class TokenApplier() {
@@ -60,7 +59,19 @@ class TokenApplier() {
   fun divideTokens(first: Token, second: Token): Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} / ${second.image()}", false, first.start, second.end) { first.asNumber(it).divide(second.asNumber(it)) }
+        Token(Word.NUMBER, "${first.image()} / ${second.image()}", false, first.start, second.end) { c ->
+          
+          val dividend = first.asNumber(c)
+          val divisor = second.asNumber(c)
+          try {
+            dividend.divide(divisor)
+          } catch (ae: ArithmeticException) {
+            if (ae.message?.startsWith("Non-terminating decimal expansion;") ?: false)
+              dividend.divide(divisor, 14, RoundingMode.HALF_UP)
+            else throw ae
+          }
+          
+        }
       else ->
         throw SyntaxErrorException("${first.word} cannot be divided by ${second.word} at ${first.start}")
       
@@ -78,7 +89,8 @@ class TokenApplier() {
     }
   
   
-  fun moduloTokens(first: Token, second: Token): Token =
+  fun moduloTokens(first: Token, second: Token)
+          : Token =
     when {
       first.isNumber() && second.isNumber() ->
         Token(Word.NUMBER, "${first.image()} ^ ${second.image()}", false, first.start, second.end) { c -> first.asNumber(c).remainder(second.asNumber(c)) }
@@ -101,7 +113,8 @@ class TokenApplier() {
       
     }
   
-  fun andTokens(first: Token, second: Token): Token =
+  fun andTokens(first: Token, second: Token)
+          : Token =
     when {
       first.isBoolean() && second.isBoolean() ->
         Token(Word.BOOLEAN, "${first.image()} && ${second.image()}", false, first.start, second.end)
@@ -120,7 +133,8 @@ class TokenApplier() {
     }
   
   
-  fun equalTokens(first: Token, second: Token): Token =
+  fun equalTokens(first: Token, second: Token)
+          : Token =
     Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end) { c ->
       first.evaluate(c) == second.evaluate(c)
     }
@@ -130,7 +144,8 @@ class TokenApplier() {
       first.evaluate(c) != second.evaluate(c)
     }
   
-  fun lessTokens(first: Token, second: Token): Token =
+  fun lessTokens(first: Token, second: Token)
+          : Token =
     when {
       first.isNumber() && second.isNumber() ->
         Token(Word.NUMBER, "${first.image()} < ${second.image()}", false, first.start, second.end)
@@ -151,7 +166,8 @@ class TokenApplier() {
     }
   
   
-  fun greaterTokens(first: Token, second: Token): Token =
+  fun greaterTokens(first: Token, second: Token)
+          : Token =
     when {
       first.isNumber() && second.isNumber() ->
         Token(Word.NUMBER, "${first.image()} > ${second.image()}", false, first.start, second.end)
@@ -172,16 +188,16 @@ class TokenApplier() {
       
     }
   
-  fun notToken(operator: Token, arg: Token): Token =
+  fun notToken(operator: Token, arg: Token)
+          : Token =
     when {
-      arg.isBoolean() -> Token(Word.BOOLEAN,"!${arg.image()}", false, operator.start, arg.end ) {
-        c -> !arg.asBoolean(c)
+      arg.isBoolean() -> Token(Word.BOOLEAN, "!${arg.image()}", false, operator.start, arg.end) { c ->
+        !arg.asBoolean(c)
       }
       else ->
         throw SyntaxErrorException("${arg.word} cannot be negated")
       
     }
-    
   
   
 }

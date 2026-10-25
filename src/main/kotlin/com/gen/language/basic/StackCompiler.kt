@@ -1,4 +1,4 @@
-package com.gen.com.gen.language.basic
+package com.gen.language.basic
 
 
 import java.util.ArrayDeque
@@ -8,15 +8,14 @@ open class StackCompiler {
   val lexer = TokenLexer()
   val applier = TokenApplier()
   
-  fun eval(expression : String) =
+  fun eval(expression: String) =
     compile(expression).evaluate(Context())
   
-  fun eval(expression : String, context: Context) =
+  fun eval(expression: String, context: Context) =
     compile(expression).evaluate(context)
   
   
-  
-  fun compile(code : String) : Token {
+  fun compile(code: String): Token {
     val tokens = lexer.lex(code)
     val compilation = compile(tokens)
     return compilation
@@ -65,7 +64,6 @@ open class StackCompiler {
     val currentArgs = ArrayDeque<Token>()
     val tokenStack = ArrayDeque(reversedTokens)
     
-    
     while (tokenStack.size > 1 || currentArgs.isNotEmpty()) {
       
       while (!tokenStack.peekLast().word.operator)
@@ -79,16 +77,18 @@ open class StackCompiler {
     return tokenStack.removeFirst()
   }
   
-  private fun retrieveArguments(arguments: ArrayDeque<Token>) =
-    arguments.pollLast() to arguments.pollLast()
+  private fun retrieveArguments(arguments: ArrayDeque<Token>): Pair<Token, Token> {
+    val second = arguments.pollLast()
+    val first = arguments.pollLast()
+    return first to second
+  }
+  
   
   private fun retrieveArgument(arguments: ArrayDeque<Token>) =
     arguments.pollLast()
   
-  private fun apply(operator: Token, arguments: ArrayDeque<Token>): Token {
-    
-    
-    return when (operator.word) {
+  private fun apply(operator: Token, arguments: ArrayDeque<Token>): Token =
+    when (operator.word) {
       Word.MINUS -> {
         if (operator.unary) applier.unaryNegativeToken(operator, retrieveArgument(arguments)) else
           retrieveArguments(arguments).let { applier.subtractTokens(operator, it.first, it.second) }
@@ -102,18 +102,17 @@ open class StackCompiler {
       Word.POWER -> retrieveArguments(arguments).let { applier.powerTokens(it.first, it.second) }
       Word.MODULO -> retrieveArguments(arguments).let { applier.moduloTokens(it.first, it.second) }
       Word.ASSIGN -> retrieveArguments(arguments).let { applier.assignExpressionTokens(operator, it.first, it.second) }
-      Word.AND -> retrieveArguments(arguments).let { applier.andTokens( it.first, it.second) }
-      Word.OR -> retrieveArguments(arguments).let { applier.orTokens( it.first, it.second) }
-      Word.EQUAL -> retrieveArguments(arguments).let { applier.equalTokens( it.first, it.second) }
-      Word.NOTEQUAL -> retrieveArguments(arguments).let { applier.notEqualTokens( it.first, it.second) }
-      Word.LESS -> retrieveArguments(arguments).let { applier.lessTokens( it.first, it.second) }
-      Word.LESSOREQUAL -> retrieveArguments(arguments).let { applier.lessOrEqualTokens( it.first, it.second) }
-      Word.GREATER -> retrieveArguments(arguments).let { applier.greaterTokens( it.first, it.second) }
-      Word.GREATEROREQUAL -> retrieveArguments(arguments).let { applier.greaterOrEqualTokens( it.first, it.second) }
+      Word.AND -> retrieveArguments(arguments).let { applier.andTokens(it.first, it.second) }
+      Word.OR -> retrieveArguments(arguments).let { applier.orTokens(it.first, it.second) }
+      Word.EQUAL -> retrieveArguments(arguments).let { applier.equalTokens(it.first, it.second) }
+      Word.NOTEQUAL -> retrieveArguments(arguments).let { applier.notEqualTokens(it.first, it.second) }
+      Word.LESS -> retrieveArguments(arguments).let { applier.lessTokens(it.first, it.second) }
+      Word.LESSOREQUAL -> retrieveArguments(arguments).let { applier.lessOrEqualTokens(it.first, it.second) }
+      Word.GREATER -> retrieveArguments(arguments).let { applier.greaterTokens(it.first, it.second) }
+      Word.GREATEROREQUAL -> retrieveArguments(arguments).let { applier.greaterOrEqualTokens(it.first, it.second) }
       Word.NOT -> applier.notToken(operator, retrieveArgument(arguments))
       else -> error("$operator is not a registered operator")
     }
-  }
-  
 }
+  
 
