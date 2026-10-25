@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.2.20'
+    id 'jacoco'
 }
 
 group = 'com.gen'
@@ -21,6 +22,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
 }
 kotlin {
     jvmToolchain(24)

@@ -1,5 +1,6 @@
 package com.gen.language.basic
 
+import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.math.pow
 
@@ -82,7 +83,7 @@ class TokenApplier() {
     when {
       first.isNumber() && second.isNumber() ->
         Token(Word.NUMBER, "${first.image()} ^ ${second.image()}", false, first.start, second.end)
-        { c -> first.asNumber(c).toDouble().pow(second.asNumber(c).toDouble()) }
+        { c -> BigDecimal.valueOf(first.asNumber(c).toDouble().pow(second.asNumber(c).toDouble())) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be elevated to power of ${second.word} at ${first.start}")
       
@@ -129,27 +130,38 @@ class TokenApplier() {
         Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end)
         { c -> first.asBoolean(c) || (second.asBoolean(c)) }
       else ->
-        throw SyntaxErrorException("${first.word} & ${second.word} at ${first.start} is not possible")
+        throw SyntaxErrorException("${first.word} & ${second.word} at position ${first.start} is not possible")
     }
   
   
-  fun equalTokens(first: Token, second: Token)
-          : Token =
-    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end) { c ->
-      first.evaluate(c) == second.evaluate(c)
-    }
+  fun equalTokens(first: Token, second: Token): Token =
+    Token(
+      Word.BOOLEAN, "${first.image()} || ${second.image()}", false,
+      first.start, second.end,
+      evaluator = when {
+        first.isNumber() && second.isNumber() ->
+          { c -> first.asNumber(c).compareTo(second.asNumber(c)) == 0 }
+        else ->
+          { c -> first.evaluate(c) == second.evaluate(c) }
+      }
+    )
+  
   
   fun notEqualTokens(first: Token, second: Token): Token =
-    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end) { c ->
-      first.evaluate(c) != second.evaluate(c)
-    }
+    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end,
+      evaluator = when {
+        first.isNumber() && second.isNumber() ->
+          { c -> first.asNumber(c).compareTo(second.asNumber(c)) != 0 }
+        else ->
+          { c -> first.evaluate(c) != second.evaluate(c) }
+      })
   
   fun lessTokens(first: Token, second: Token)
           : Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} < ${second.image()}", false, first.start, second.end)
-        { c -> first.asNumber(c) < (second.asNumber(c)) }
+        Token(Word.BOOLEAN, "${first.image()} < ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) < second.asNumber(c) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
       
@@ -158,20 +170,19 @@ class TokenApplier() {
   fun lessOrEqualTokens(first: Token, second: Token): Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} <= ${second.image()}", false, first.start, second.end)
-        { c -> first.asNumber(c) <= (second.asNumber(c)) }
+        Token(Word.BOOLEAN, "${first.image()} <= ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) <= second.asNumber(c) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
       
     }
   
   
-  fun greaterTokens(first: Token, second: Token)
-          : Token =
+  fun greaterTokens(first: Token, second: Token): Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} > ${second.image()}", false, first.start, second.end)
-        { c -> first.asNumber(c) > (second.asNumber(c)) }
+        Token(Word.BOOLEAN, "${first.image()} > ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) > second.asNumber(c) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
       
@@ -181,8 +192,8 @@ class TokenApplier() {
   fun greaterOrEqualTokens(first: Token, second: Token): Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} >= ${second.image()}", false, first.start, second.end)
-        { c -> first.asNumber(c) >= (second.asNumber(c)) }
+        Token(Word.BOOLEAN, "${first.image()} >= ${second.image()}", false, first.start, second.end)
+        { c -> first.asNumber(c) >= second.asNumber(c) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
       

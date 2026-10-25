@@ -26,6 +26,6 @@ enum class Word(val lexable: Boolean, val regexImage: String, val operator: Bool
   ENDPAR(true, "\\)"),
   ASSIGN(true, "=", true, 10),
   
-  CR(true, "\\n"),
+  //CR(true, "\\n"),
   
 }

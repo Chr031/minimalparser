@@ -40,7 +40,16 @@ class TokenLexer {
   
   fun numberEvaluator(image: String) = { _: Context -> BigDecimal(image) }
   fun booleanEvaluator(image: String) = { _: Context -> image.toBoolean() }
-  fun stringEvaluator(image: String) = { _: Context -> image }
+  fun stringEvaluator(image: String) = { _: Context -> cleanStringImage(image) }
   fun variableEvaluator(image: String) = { c: Context -> c.get(image)?.evaluate(c) ?: Unit }
+
+  private fun cleanStringImage(image:String) : String {
+    if (image.length<2) return ""
+    val firstChar = image.first()
+    
+    val notEscaped = image.substring(1, image.length-1)
+    val escaped = notEscaped.replace("\\$firstChar", "$firstChar")
+    return escaped
+  }
   
 }
