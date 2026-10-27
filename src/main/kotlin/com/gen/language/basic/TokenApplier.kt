@@ -38,7 +38,7 @@ class TokenApplier() {
     when {
       first.isNumber() && second.isNumber() ->
         Token(Word.NUMBER, "${first.image()} + ${second.image()}", false, first.start, second.end) { c -> first.asNumber(c).add(second.asNumber(c)) }
-       else ->
+      else ->
         throw SyntaxErrorException("${first.word} cannot be added to ${second.word} at ${first.start}")
       
     }
@@ -98,12 +98,12 @@ class TokenApplier() {
     }
   
   
-  fun assignExpressionTokens(operator: Token, first: Token, second: Token): Token =
+  fun assignExpressionTokens(first: Token, second: Token): Token =
     when {
       first.isVariable() -> Token(Word.VARIABLE, first.varImage(), false, first.start, second.end)
       { c ->
         val eval = second.evaluate(c)
-        c.varMap[first.varImage()] = Token(Word.VARIABLE, first.varImage(), false, first.start, second.end) { eval }
+        c.varMap[first.varImage()] = eval
         eval
       }
       else ->
@@ -218,7 +218,7 @@ class TokenApplier() {
     when {
       first.isString() && second.isString() ->
         Token(Word.BOOLEAN, "${first.image()} contains ${second.image()}", false, first.start, second.end)
-        { c -> first.asString(c) .contains(second.asString(c)) }
+        { c -> first.asString(c).contains(second.asString(c)) }
       else ->
         throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
     }

@@ -101,7 +101,7 @@ open class StackCompiler {
       Word.DIVIDE -> retrieveArguments(arguments).let { applier.divideTokens(it.first, it.second) }
       Word.POWER -> retrieveArguments(arguments).let { applier.powerTokens(it.first, it.second) }
       Word.MODULO -> retrieveArguments(arguments).let { applier.moduloTokens(it.first, it.second) }
-      Word.ASSIGN -> retrieveArguments(arguments).let { applier.assignExpressionTokens(operator, it.first, it.second) }
+      Word.ASSIGN -> retrieveArguments(arguments).let { applier.assignExpressionTokens(it.first, it.second) }
       Word.AND -> retrieveArguments(arguments).let { applier.andTokens(it.first, it.second) }
       Word.OR -> retrieveArguments(arguments).let { applier.orTokens(it.first, it.second) }
       Word.EQUAL -> retrieveArguments(arguments).let { applier.equalTokens(it.first, it.second) }
