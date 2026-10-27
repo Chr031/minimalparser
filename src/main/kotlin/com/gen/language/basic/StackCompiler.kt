@@ -111,6 +111,9 @@ open class StackCompiler {
       Word.GREATER -> retrieveArguments(arguments).let { applier.greaterTokens(it.first, it.second) }
       Word.GREATEROREQUAL -> retrieveArguments(arguments).let { applier.greaterOrEqualTokens(it.first, it.second) }
       Word.NOT -> applier.notToken(operator, retrieveArgument(arguments))
+      Word.CONCAT -> retrieveArguments(arguments).let { applier.concatenateTokens( it.first, it.second )}
+      Word.CONTAINS -> retrieveArguments(arguments).let { applier.containsTokens( it.first, it.second )}
+      
       else -> error("$operator is not a registered operator")
     }
 }

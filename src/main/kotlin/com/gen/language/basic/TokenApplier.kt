@@ -10,14 +10,14 @@ class TokenApplier() {
   
   fun unaryNegativeToken(operator: Token, arg: Token): Token =
     if (arg.isNumber())
-      Token(Word.NUMBER, "- (${arg.image()})", false, operator.start, arg.end) { arg.asNumber(it).negate() }
+      Token(Word.NUMBER, "- (${arg.image()})", false, operator.start, arg.end) { c -> arg.asNumber(c).negate() }
     else
       throw SyntaxErrorException("${arg.image()} at ${arg.start} is not a number")
   
   
   fun subtractTokens(operator: Token, first: Token, second: Token): Token =
     if (first.isNumber() && second.isNumber()) {
-      Token(Word.NUMBER, "${first.image()} - ${second.image()}", false, operator.start, second.end) { first.asNumber(it).minus(second.asNumber(it)) }
+      Token(Word.NUMBER, "${first.image()} - ${second.image()}", false, operator.start, second.end) { c -> first.asNumber(c).minus(second.asNumber(c)) }
     } else
       if (!first.isNumber())
         throw SyntaxErrorException("${first.image()} at ${first.start} is not a number")
@@ -37,11 +37,8 @@ class TokenApplier() {
   fun addTokens(first: Token, second: Token): Token =
     when {
       first.isNumber() && second.isNumber() ->
-        Token(Word.NUMBER, "${first.image()} + ${second.image()}", false, first.start, second.end) { first.asNumber(it).add(second.asNumber(it)) }
-      first.isString() || second.isString() ->
-        Token(Word.STRING, "${first.image()}${second.image()}", false, first.start, second.end) { "${first.evaluate(it)}${second.evaluate(it)}" }
-      
-      else ->
+        Token(Word.NUMBER, "${first.image()} + ${second.image()}", false, first.start, second.end) { c -> first.asNumber(c).add(second.asNumber(c)) }
+       else ->
         throw SyntaxErrorException("${first.word} cannot be added to ${second.word} at ${first.start}")
       
     }
@@ -148,7 +145,8 @@ class TokenApplier() {
   
   
   fun notEqualTokens(first: Token, second: Token): Token =
-    Token(Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end,
+    Token(
+      Word.BOOLEAN, "${first.image()} || ${second.image()}", false, first.start, second.end,
       evaluator = when {
         first.isNumber() && second.isNumber() ->
           { c -> first.asNumber(c).compareTo(second.asNumber(c)) != 0 }
@@ -199,16 +197,30 @@ class TokenApplier() {
       
     }
   
-  fun notToken(operator: Token, arg: Token)
-          : Token =
+  fun notToken(operator: Token, arg: Token): Token =
     when {
       arg.isBoolean() -> Token(Word.BOOLEAN, "!${arg.image()}", false, operator.start, arg.end) { c ->
         !arg.asBoolean(c)
       }
       else ->
         throw SyntaxErrorException("${arg.word} cannot be negated")
-      
     }
   
+  fun concatenateTokens(first: Token, second: Token): Token =
+    when {
+      first.isString() || second.isString() ->
+        Token(Word.STRING, "${first.image()}${second.image()}", false, first.start, second.end) { c -> "${first.evaluate(c)}${second.evaluate(c)}" }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be concatenated to ${second.word} at ${first.start}")
+    }
+  
+  fun containsTokens(first: Token, second: Token): Token =
+    when {
+      first.isString() && second.isString() ->
+        Token(Word.BOOLEAN, "${first.image()} contains ${second.image()}", false, first.start, second.end)
+        { c -> first.asString(c) .contains(second.asString(c)) }
+      else ->
+        throw SyntaxErrorException("${first.word} cannot be compared to ${second.word} at ${first.start}")
+    }
   
 }

@@ -28,15 +28,21 @@ class ComparisonCompilationTest {
         Arguments.of("true != true", "false"),
         Arguments.of("false != false", "false"),
         Arguments.of("true != false", "true"),
-        Arguments.of("'abc' == 'ab' + 'c'", "true"),
-        Arguments.of("'abc' == 'ab' + 'cd'", "false"),
+        Arguments.of("'abc' == 'ab' . 'c'", "true"),
+        Arguments.of("'abc' == 'ab' . 'cd'", "false"),
         Arguments.of("'' == false", "false"),
         Arguments.of("'' == ''", "true"),
         Arguments.of("'' != ''", "false"),
         Arguments.of("'12' == 12", "false"),
         Arguments.of("'12' != '12'", "false"),
+        Arguments.of("36 == 6 + 6 * 2 + 6 * 3", "true"),
         
-        )
+        Arguments.of("'abc' ~= 'abc'", "true"),
+        Arguments.of("'normally' ~= 'norm'", "true"),
+        Arguments.of("!('basic' ~= 'base')", "true"),
+        Arguments.of("'bas'.'ic' ~= 'basic'", "true")
+      
+      )
   }
   
   val compiler = StackCompiler()

@@ -14,10 +14,15 @@ open class Token(val word: Word, private val image: String, val unary: Boolean, 
   fun asBoolean(context: Context): Boolean = evaluator(context) as Boolean
   fun asString(context: Context): String = evaluator(context) as String
   
-  fun isNumber() = this.word == Word.NUMBER
-  fun isString() = this.word == Word.STRING
-  fun isBoolean() = this.word == Word.BOOLEAN
+  fun isNumber() = this.word == Word.NUMBER || isVariable()
+  fun isString() = this.word == Word.STRING || isVariable()
+  fun isBoolean() = this.word == Word.BOOLEAN || isVariable()
   fun isVariable() = this.word == Word.VARIABLE
+  
+  
+  override fun toString(): String {
+    return "Token(word=$word, image='$image', unary=$unary, start=$start, end=$end)"
+  }
   
   
 }

@@ -6,7 +6,7 @@ enum class Word(val lexable: Boolean, val regexImage: String, val operator: Bool
   BOOLEAN(true, "true|false"),
   NUMBER(true, "[0-9]+(\\.[0-9]+)?"),
   STRING(true, "'(?:[^'\\\\]|\\\\.)*'"), // string is always between ', and \' for escape
-  VARIABLE(true, "[a-zA-Z_][a-zA-Z0-9_]*"),
+  VARIABLE(true, "[a-zA-Z_$][a-zA-Z0-9_$]*"),
   PLUS(true, "\\+", true, 60),
   MINUS(true, "-", true, 60),
   MULTIPLY(true, "\\*", true, 70),
@@ -14,6 +14,8 @@ enum class Word(val lexable: Boolean, val regexImage: String, val operator: Bool
   POWER(true, "\\^", true, 80),
   MODULO(true, "%", true, 85),
   EQUAL(true, "==", true, 50),
+  CONCAT(true, "\\.",  true, 60),
+  CONTAINS(true, "~=", true, 50),
   NOTEQUAL(true, "!=", true, 50),
   LESSOREQUAL(true, "<=", true, 50),
   GREATEROREQUAL(true, ">=", true, 50),
@@ -26,6 +28,7 @@ enum class Word(val lexable: Boolean, val regexImage: String, val operator: Bool
   ENDPAR(true, "\\)"),
   ASSIGN(true, "=", true, 10),
   
+  EXPRESSION(false, "")
   //CR(true, "\\n"),
   
 }

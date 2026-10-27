@@ -13,12 +13,9 @@ class StringCompilationTest {
     fun stringExpressionsParams(): Stream<Arguments> =
       Stream.of(
         Arguments.of("'1'", "1"),
-        Arguments.of("'8/2' + 12", "8/212"),
-        Arguments.of("'this is a test' + '!'", "this is a test!"),
-        Arguments.of(
-          """
-          'for \'escape\'' + '!'""", "for 'escape'!"
-        ),
+        Arguments.of("'8/2' . 12", "8/212"),
+        Arguments.of("'this is a test' . '!'", "this is a test!"),
+        Arguments.of(""" 'for \'escape\'' . '!'""", "for 'escape'!"),
         
         )
     

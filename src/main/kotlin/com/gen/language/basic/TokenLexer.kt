@@ -41,7 +41,7 @@ class TokenLexer {
   fun numberEvaluator(image: String) = { _: Context -> BigDecimal(image) }
   fun booleanEvaluator(image: String) = { _: Context -> image.toBoolean() }
   fun stringEvaluator(image: String) = { _: Context -> cleanStringImage(image) }
-  fun variableEvaluator(image: String) = { c: Context -> c.get(image)?.evaluate(c) ?: Unit }
+  fun variableEvaluator(image: String) = { c: Context -> c.get(image) ?: throw SyntaxErrorException("No variables named '$image' are defined") }
 
   private fun cleanStringImage(image:String) : String {
     if (image.length<2) return ""
