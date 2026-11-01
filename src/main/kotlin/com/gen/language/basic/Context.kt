@@ -3,8 +3,7 @@ package com.gen.language.basic
 import java.math.BigDecimal
 
 class Context {
-  
-  
+
   val varMap: MutableMap<String, Any> = mutableMapOf()
   
   constructor(values: List<Pair<String, Any>> = listOf()) {
