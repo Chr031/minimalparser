@@ -4,7 +4,7 @@ package com.gen.language.basic
 import java.util.ArrayDeque
 
 open class StackCompiler {
-  
+
   val lexer = TokenLexer()
   val applier = TokenApplier()
   
@@ -13,15 +13,13 @@ open class StackCompiler {
   
   fun eval(expression: String, context: Context) =
     compile(expression).evaluate(context)
-  
-  
+
   fun compile(code: String): Token {
     val tokens = lexer.lex(code)
     val compilation = compile(tokens)
     return compilation
   }
-  
-  
+
   fun compile(tokens: List<Token>): Token {
     val stack = reverseStack(tokens)
     return compileReverseStack(stack)
@@ -37,7 +35,7 @@ open class StackCompiler {
     
     tokens.forEach { token ->
       if (token.word.operator) {
-        while (operatorStack.isNotEmpty() && operatorStack.peek().let { it.word.priority > token.word.priority && it.word != Word.OPENPAR }) {
+        while (!token.unary && operatorStack.isNotEmpty() && operatorStack.peek().let { it.word.priority >= token.word.priority && it.word != Word.OPENPAR }) {
           stack.push(operatorStack.pop())
         }
         operatorStack.push(token)

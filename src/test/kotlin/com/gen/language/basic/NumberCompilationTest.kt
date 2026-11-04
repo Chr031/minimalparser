@@ -7,12 +7,19 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 class NumberCompilationTest {
-  
+
   companion object {
     @JvmStatic
     fun numberExpressionsParams(): Stream<Arguments> =
       Stream.of(
-        Arguments.of("1 -2", "-1"),
+        Arguments.of("1 + 2 - 3", "0"),
+        Arguments.of("1 - 2 + 3", "2"),
+        Arguments.of("1 - 2 - 3", "-4"),
+        Arguments.of("1 - 2", "-1"),
+        Arguments.of("-1 - 2 ", "-3"),
+        Arguments.of("-1 - 2 -1", "-4"),
+        Arguments.of("-1 - 2 +1", "-2"),
+        Arguments.of("-1 - 2 +1 - -2", "0"),
         Arguments.of("8/2", "4"),
         Arguments.of("3+ -1", "2"),
         Arguments.of("3+ -(10-3*4)", "5"),
@@ -24,13 +31,19 @@ class NumberCompilationTest {
         Arguments.of("(1+3)%2", "0"),
         Arguments.of("+1", "1"),
         Arguments.of("+1 + 10", "11"),
-        Arguments.of("+(1 - 10) - (+1-10)", "0"),
+        Arguments.of("+1 - 10", "-9"),
+        Arguments.of("+(1 - 10) - (+1-10) - (-(-(-1)))", "1"),
+        Arguments.of("+1 * -3", "-3"),
+        Arguments.of("+1 * -3 + 2", "-1"),
+        Arguments.of("+1 / -3 + 2", "1.66666666666667"),
+        Arguments.of("6 / 3 / 2", "1"),
+        Arguments.of("6 / 3 * 2", "4"),
       )
   }
-  
+
   val compiler = StackCompiler()
-  
-  
+
+
   @ParameterizedTest
   @MethodSource("numberExpressionsParams")
   fun testNumberCompilation(expression: String, resultAsString: String) {
